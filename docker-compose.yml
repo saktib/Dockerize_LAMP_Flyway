@@ -1,0 +1,45 @@
+version: '2.0'
+services:
+
+  # LAMP Stack setup with Hello World!
+  devbox:
+    container_name: DevBox-LAMP-Container
+    build:
+      context: ./
+      dockerfile: ./DockerFiles/DevBox.DockerFile
+    ports:
+      - "80:80"
+    volumes:
+      - ./src:/var/www/html
+
+  # Linux & Apache setup with HTML UI (Xandr Home Page) with port forwarding.    
+  devbox-ui:
+    container_name: DevBox-UI-Container
+    build:
+      context: ./
+      dockerfile: ./DockerFiles/DevBox_UI.DockerFile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src_ui:/var/www/html
+ 
+  # Mysql Setup.    
+  devmysql:
+    container_name: DevBox-Mysql-Container
+    build:
+      context: ./
+      dockerfile: ./DockerFiles/MySQLDev.DockerFile
+    ports:
+      - "3306:3306"
+
+  # Flyway setup and migration.    
+  flyway:
+   container_name: DevBox-Flyway-Container
+   image: flyway/flyway
+   command: -url=jdbc:mysql://devmysql:3306/testapp -user=root -connectRetries=60 migrate
+   volumes:
+      - ./flyway_migrations:/flyway/sql
+   depends_on:
+     - devmysql
+
+  
